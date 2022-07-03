@@ -1,0 +1,245 @@
+1 - Ferramenta para auxiliar no desenvolvimento, recarrega a aplicação sempre que atualizado.
+    instale o ts-node-dev 
+    --transpile-only -> evita erros na parte de desenvolvimento
+    --ignore-watch node_modules -> não fica verificando as mudanças dentro da pasta node_modules
+    --respawn -> faz com que a aplicação sempre de o reload quando houver alguma alteração no código
+    --inspect -> faz com que o debug consiga se conectar com a aplicação.
+
+2 - tsconfig
+    * deixar o strict comentado, o strict é responsavel por alguns erros de tipagem do JS, porém o TS 
+    já faz isso e é mais confiavel.
+
+3 - prettier e eslint 
+    ferramentas para desenvolvimento em grupo.
+    documentação: https://www.notion.so/ESLint-e-Prettier-Trilha-Node-js-d3f3ef576e7f45dfbbde5c25fa662779#eaf6e8bdcabc4d809cdae302e29750da
+
+4 - dependencias
+    uuid -> criar identificadores unicos
+
+5 - funções do JS
+    - Object.assign(objeto, {atributos a serem passados}) -> atribui a um objeto/classe valores às suas chaves
+    -   {
+            - no JS isso ->
+
+            private categoriesRepository: CategoriesRepository;
+            constructor(categoriesRepository: CategoriesRepository){
+                this.categoriesRepository = categoriesRepository
+            }
+
+            - é igual a isso ->
+
+            constructor(private categoriesRepository: CategoriesRepository){};
+        }
+    - fs (file sistem) -> é um módulo nativo do NodeJS que permite que execultemos algumas funções através dele.
+        {
+            const stream = fs.createReadStream(file.path) -> recebe o path do arquivo file como argumento
+            stream.pipe -> pega o que está sendo lido no stream e joga para o lugar onde for determinado
+        }
+
+6 - DTO
+    D -> data
+    T -> transfer
+    O -> object
+    é um conseito de criar um objeto que faz a transferencia de camadas entre uma classe e outra.
+    sempre que for receber informações vindas das rotas, serão criados so DTOs
+
+7 - singlenton pattern
+    um padrão de projeto que tem como definição criar uma instancia global de uma instancia de uma classe.
+    -deve ser visto se realmente só pode ter um ponto de instancia ou se a classe precisa ser instanciada mais de uma vez
+     pois o singlenton não deve ser usado de qualquer forma
+
+8 - multer
+    - para trabalhar com upload de arquivos (preferencialmente .CSV)
+    -   {
+            - const upload = multer() -> apenas ler os arquivos.
+            - const upload = multer({
+                                        dest: "./pasta-temporaria" -> informa o destino onde o arquivo será salvo
+                                    })
+
+            - o upload é um middleware que deve ser utilizado antes do (req, res)
+              ex: .get('/', upload('termo-reconhecido-pelo-insominia'), (req, res)=>{})
+
+        }
+
+9 - csv-parse
+    biblioteca especial para trabalhar com arquivos .CSV
+    - delimiter -> Seleciona qual será o delimitador usado no arquivo .CSV
+
+10 - docker
+    - dockerfile -> onde fica o passo a passo para rodar a aplicação do docker
+        -   {
+                FROM node:latest        -> imagem que será utilizada na ultima versão
+                WORKDIR /usr/app        -> local onde será salvo 
+                COPY package.json ./    -> copia o arquivo para o directorio do docker
+                RUN npm install         -> comando que será execultado após copiar o arquivo
+                COPY . .                -> copia tudo da raiz do projeto para a raiz do docker
+                EXPOSE 3333             -> seleciona a porta onde o docker será acessado
+                CMD ["npm", "run", "dev"]-> comandos que serão execultados após iniciar o docker
+            }
+        - docker build -t nome_da_imagem directorio -> ex: docker build -t rentx . -> cria a imagem do docker build
+        - docker run -p porta_local:porta_docker nome_da_imagem
+    - docker-compose.yml -> orquestrador de container
+    - comandos  {
+                    -p                                          -> mapeamento de portas: ex: docker rentx -p 3333:3333 
+                    docker ps                                   -> lista os containers abertos
+                    docker ps -a                                -> lista todos os contain abertos ou fechados
+                    docker exec -it eloquent_mccarthy /bin/bash -> acessa o container
+                    docker exec -it /bin/bash                   -> execulta e acessa o container
+                    docker-compose up -d                        -> roda em background
+                    docker nomeDaImage -f                       -> força a execulção de alguma coisa que não entendi
+                    docker rm id_do_container                   -> deleta o container
+                    docker stop id_do_container                 -> para o container
+                    docker start id_do_container                -> inicia o container
+                    docker-compose stop                         -> para todos os serviçõs do docker-compose
+                    docker-compose start                        -> inicia todos os serviços do docker-compose
+                    docker logs id_da_aplicação                 -> mostra todos os logs da aplicação
+                    docker logs -f                              -> persiste os logs e os mostra sempre que houver alteração
+                }
+
+11 - typeORM com postgres
+        - install
+            - typeORM
+            - reflect-metadata
+            - pg
+        - configurações do tsconfig
+            - emitDecoratorMetadata: true
+            - experimentalDecoratos: true
+        - deve ser criada a conexão do typeORM -> o index dentro da pasta database e importado no server
+        - as configurações devem ficar dentro de um arquivo ormconfig.json
+        - scripts   {
+                        "typeorm":"ts-node-dev ./node_modules/typeorm/cli" -> para o ts-node-dev acessar o cli do typeorm
+                    }
+        - comandos  {
+                        yarn typeorm migration:create -n nome-da-migration  -> cria a migration
+                        yarn typeorm migration:run                          -> roda o up das migrations
+                        yarn typeorm migration:revert                       -> roda o down das migrations
+                    }
+12 - tsyring
+        - para trabalhar com injeção de dependencias
+
+13 - express-async-errors 
+        - para trabalhar com erros assincronos no express
+
+14 - sobrescrever tipagem do express
+        1 - criar pasta @types dentro do scr
+        2 - colocar dentro dela a biblioteca que queremos reescrever (como pasta) e dentro dela um index.d.ts
+        3 - cria um arquivo com as alterações na interface.
+            {
+                declare namespace Express {
+                    export interface Request {
+                        user: {
+                            id: string;
+                        }
+                    }
+                }
+            }
+
+15 - testes unitários -> testes por partes
+
+16 - testes de integração -> testes por agrupamento
+
+17 - TDD -> metodologia de testes
+
+18 - jest -> biblioteca para fazer os testes
+    - instale como dependencia de desenvolvimento
+    - yarn jest --init -> inicia o jest
+    - perguntas
+        - quer criar um script de teste no package.json -> y
+        - quer utilizar o typescript -> y 
+        - qual o teste environment -> node
+        - se quer instalar o coverage reports -> falar proj jast mostrar quais são os usecase e quais não tem parte de testes implementados -> n
+        - qual o provider -> v8
+        - se quer que limpe os providers entre os testes -> y
+    - configurações do jest.config
+        {
+            - preset: "ts-jest",
+            - testMatch -> local onde ficará os testes
+            - bail -> fala se quer que a aplicação pare ou não se existir um erro. (true ele para)
+        }
+    - comandos
+        {
+            yarn test -> roda os testes
+        }
+
+19 - ts-jest -> auxiliar do jest
+
+20 - arquivos.spec.ts -> padrão para testes
+    - describe() -> para agrupar os testes
+    - expect(valor) -> valor que será testado
+    - .toBe(result) -> valor que deve ser o valor testado;
+    - beforeAll -> antes de tudo faça
+    - beforeEach -> sempre antes de algum teste ele vai fazer uma função
+    - .toHaveProperty('id') -> verifica se tem a propriedade passada para ele, no exemplo ('id');
+
+21 - baseUrl -> URL base do ficheiro principal do projeto
+
+22 - paths -> configuração do ts-config para auxiliar na organização de directorios
+    - é utilizado junto com o baseUrl
+    - sintaxe 
+        {
+            "baseUrl": "./src",                          
+            "paths": {
+            "@modules/*":["modules/*"],
+            "@config/*":["config/*"],
+            "@shared/*":["shared/*"],
+            "@errors/*":["errors/*"],
+            "@utils/*":["utils/*"]
+            },  
+        }
+
+23 - tsconfig-paths -> biblioteca para ser possivel utilizar o paths do tsconfig no projeto
+    - forma de usar 
+        - no package.json colocar a inicialização dessa forma -> "dev":"ts-node-dev -r tsconfig-paths/register --inspect --transpile-only --ignore-watch node_modules --respawn src/server.ts"
+        - no package.json colocar o typeorm dessa forma -> "typeorm": "ts-node-dev -r tsconfig-paths/register ./node_modules/typeorm/cli"
+
+24 - forma rápida de cria uma FK no typeORM
+    - foreignKeys: [
+                {
+                    name: 'FKCategoryCar', //nome da fk
+                    referencedTableName: 'categories',  //de onde vem a fk
+                    referencedColumnNames: ['id'],//nome da coluna referenciada (de onde vem)
+                    columnNames: ['category_id'], //nome da coluna que recebe a fk
+                    onDelete: 'SET_NULL',
+                    onUpdate: 'SET_NULL'
+                }
+            ]
+
+25 - SEED -> criação de usuário admin ou outra credencial diretamente no código.
+    - crie um script para rodar o seed -> "seed:admin": "ts-node-dev src/shared/infra/typeorm/seed/admin.ts"
+    - código exemplo -> index
+        {
+            export default async(host = 'database'): Promise<Connection> => {
+    
+            const defaultOpitions = await getConnectionOptions();
+
+                return createConnection(
+                    Object.assign(
+                        defaultOpitions,
+                        {
+                            host,
+                        }
+                    )
+                )
+            }   
+        }    
+    - código exemplo -> admin
+        {
+            const connection = getConnection(); //pega a conexão existente
+
+            const id = uuidV4();
+            const password = await hash('admin', 8);
+
+            await connection.query(
+                `INSERT INTO users (id, name, email, password, admin, created_at)
+                VALUES('${id}', 'admin', 'admin@rentx.com.br', '${password}', true, ${new Date()})`
+            ); //criação do usuário com sql puro.
+        }
+
+26 - dayjs -> biblioteca para auxiliar a trabalhar com database
+    - import utc from 'dayjs/plugin/utc'; -> dayjs.extend(utc); -> para forçar o padrão UTC.
+    - dayjs() -> hora atual
+
+27 - supertest -> servidor que permite criar um server http dento dos métodos
+
+28 - ethereal -> ferramenta para envios de email
+    - necessita instalar o nodemailer
